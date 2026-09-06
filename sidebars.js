@@ -22,7 +22,7 @@ const sidebars = {
       items: [
         "knowledge/software-development/javascript",
         "knowledge/software-development/typescript",
-        "knowledge/software-development/angular",
+        "knowledge/software-development/Angular",
       ],
     },
 
@@ -70,6 +70,12 @@ const sidebars = {
       type: "category",
       label: "Kaggle Projects",
       items: ["projects/competitions"],
+    },
+
+    {
+      type: "category",
+      label: "AI Agent",
+      items: ["projects/AI Agent/rag"],
     },
   ],
 };

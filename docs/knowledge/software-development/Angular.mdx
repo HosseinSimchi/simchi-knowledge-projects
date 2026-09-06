@@ -1,0 +1,502 @@
+## Installation and Setup
+
+Use the following command to install the latest Angular CLI as a development dependency:
+
+```bash
+npm i --save-dev @angular/cli@latest
+```
+
+---
+
+## Recommended Project Structure
+
+Organizing your project effectively improves maintainability and scalability. Below is a suggested folder structure:
+
+```text
+src
+│
+├── account
+│   ├── components
+│   └── account.routes.ts
+│
+├── app
+│   ├── app.routes.ts
+│   ├── pages
+│   └── components
+│
+├── shared
+│   ├── classes          (e.g., `base.form.class.ts`)
+│   ├── components
+│   ├── pipes
+│   ├── services
+│   ├── utility
+│   ├── models
+│   ├── guards
+│   └── interceptors
+│
+├── assets
+├── environments
+└── root
+    ├── RootComponent
+    ├── root.config.ts
+    └── route.routes.ts
+```
+
+---
+
+## RxJS
+
+### State Management
+
+#### `Subject` / `BehaviorSubject`
+
+- **Service (`CustomService`)**
+
+```ts
+childsValue = new BehaviorSubject<any>(null);
+```
+
+- **FirstComponent (Subscriber)**
+
+```ts
+this.data = this.customService.childsValue.subscribe({
+  next: (response: any) => this.handleUpdatedValueSuccess(response),
+});
+```
+
+- **SecondComponent (Producer)**
+
+```ts
+this.customService.childsValue.next(2);
+```
+
+---
+
+## Unit Testing with Karma and Jasmine
+
+### Script Configuration
+
+Add or update the following script in `package.json`:
+
+```js
+"app": "sudo -v && ng run Test && ng s"
+```
+
+### Types of Unit Tests
+
+Unit tests generally fall into two categories:
+
+#### Isolated Tests
+
+Test a single unit (e.g., a function or method) in isolation.
+
+#### Integration Tests
+
+Verify interactions between multiple units or functionalities.
+
+##### Component Tests
+
+- **`.ts` and `.html` → Shallow Integration Tests**  
+  Test the interaction between the component's TypeScript logic and its template.
+
+- **`.ts` → Isolated Tests**  
+  Test the component's TypeScript logic independently from the template.
+
+##### Deep Integration Tests
+
+Verify communication between two or more components.
+
+---
+
+### Types of Mocks
+
+| Type        | Description                                                                                                                           |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Dummies** | Objects that satisfy structural requirements but are not used during test execution.                                                  |
+| **Stubs**   | Provide controlled behavior for dependencies.                                                                                         |
+| **Spies**   | Monitor interactions (e.g., method calls, arguments, call count). Common Jasmine APIs: `jasmine.createSpy(...)`, `spyOn(..., "...")`. |
+
+#### Spies Can Be Used To:
+
+- Verify that a method was called with correct parameters.
+- Check how many times a method was called.
+- Simulate specific behavior under certain conditions.
+
+---
+
+### Comparison: `createSpyObj()` vs `createSpy()` vs `spyOn()`
+
+| Method           | Purpose                                                                                                                                                  |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `createSpyObj()` | Creates a mock object with multiple spy methods. Can be used as spies or stubs when behavior is defined using `.and.returnValue()` or `.and.callFake()`. |
+| `createSpy()`    | Creates a single spy function. Can also act as a stub when behavior is defined.                                                                          |
+| `spyOn()`        | Creates a spy on an existing method of an object. Can be configured to simulate behavior.                                                                |
+
+---
+
+### `.and.returnValue()` vs `.and.callFake()`
+
+| Method               | Behavior                                                                         |
+| -------------------- | -------------------------------------------------------------------------------- |
+| `.and.returnValue()` | Returns a fixed value regardless of input arguments.                             |
+| `.and.callFake()`    | Replaces the implementation with a custom function that can use input arguments. |
+
+**Example:**
+
+```js
+// returnValue
+const spy1 = jasmine.createSpy("add").and.returnValue(5);
+spy1(2, 3); // 5
+
+// callFake
+const spy2 = jasmine.createSpy("add").and.callFake((a, b) => a + b);
+spy2(2, 3); // 5
+```
+
+---
+
+### Test Suites and Test Cases
+
+- **`describe("", () => {})`** → Groups related test cases.
+- **`it("", () => {})`** → Defines an individual test case (follows **Arrange → Act → Assert**).
+- **`xit("", () => {})`** → Disables a test temporarily (equivalent to `pending()`).
+
+---
+
+## Components
+
+### Passing a Controller from Parent to Child
+
+**ParentComponent**
+
+```ts
+this.contactForm = this._fb.group({
+  id: [""],
+  name: ["", [Validators.required]],
+});
+```
+
+**ChildComponent**
+
+```ts
+controller = input<FormControl>();
+```
+
+**Template**
+
+```html
+<input matInput [formControl]="controller" />
+```
+
+---
+
+## Signals
+
+### Types of Signals
+
+- **`signal`** – Basic reactive state.
+
+```ts
+const count = signal(0);
+```
+
+- **`computed`** – Derived state.
+
+```ts
+const doubleCount: Signal<number> = computed(() => count() * 2);
+```
+
+- **`effect`** – Side effects.
+
+```ts
+effect(() => {
+  console.log(`The current count is: ${count()}`);
+});
+```
+
+- **`linkedSignal`** – Automatically updates when its source changes.
+
+```ts
+const shippingOptions = signal(["Ground", "Air", "Sea"]);
+const selectedOption = linkedSignal(() => shippingOptions()[0]);
+```
+
+---
+
+### `Input` – Receiving Values from Parent
+
+**Parent Template**
+
+```html
+<custom-slider [value]="50" />
+```
+
+**Child Component**
+
+```ts
+value = input(0);
+value = input.required<number>();
+this.value();
+```
+
+---
+
+### `model` – Two-Way Binding
+
+**Child**
+
+```ts
+value = model(0);
+```
+
+**Parent Template**
+
+```html
+<custom-slider [(value)]="volume" />
+```
+
+**Parent Component**
+
+```ts
+volume = signal(0);
+```
+
+---
+
+### `output` – Emitting Events
+
+**Child**
+
+```ts
+panelClosed = output<void>();
+this.panelClosed.emit();
+```
+
+**Parent Template**
+
+```html
+<expandable-panel (panelClosed)="savePanelState($event)" />
+```
+
+---
+
+### `viewChild` – Accessing Child Elements
+
+**Template**
+
+```html
+<custom-card-header>Visit sunny California!</custom-card-header>
+```
+
+**Component**
+
+```ts
+header = viewChild(CustomCardHeader);
+header = viewChild.required(CustomCardHeader);
+headerText = computed(() => this.header()?.text);
+```
+
+---
+
+## Guards – Route Protection
+
+```ts
+{
+  path: 'users',
+  canActivateChild: [authGuard],
+  children: [
+    { path: 'list', component: UserListComponent },      // PROTECTED
+    { path: 'detail/:id', component: UserDetailComponent } // PROTECTED
+  ]
+}
+```
+
+---
+
+## Template Syntax
+
+### Control Flow
+
+```html
+@if (condition) { } @else if (condition) { } @else { }
+```
+
+```html
+@for (item of items; track item.id) { }
+```
+
+```html
+@switch (value) { @case (1) { } @default { } }
+```
+
+### Deferred Loading (`@defer`)
+
+```html
+@defer {
+<large-component />
+} @loading {
+<img alt="loading..." src="loading.gif" />
+} @placeholder {
+<p>Placeholder content</p>
+}
+```
+
+```html
+@defer {
+<large-component />
+} @error {
+<p>Failed to load large component.</p>
+}
+```
+
+---
+
+## CSS Binding
+
+```html
+<ul [class.expanded]="isExpanded()"></ul>
+<ul [class]="listClasses"></ul>
+<section [style.display]="isExpanded() ? 'block' : 'none'"></section>
+```
+
+---
+
+## Services
+
+### Dependency Injection
+
+```ts
+private router = inject(Router);
+private analytics = inject(AnalyticsLogger);
+private element = inject(ElementRef);
+private http = inject(HttpClient);
+const auth = inject(AuthService);
+```
+
+### Memory Management – Unsubscribing
+
+```ts
+private destroy$ = new Subject<void>();
+
+this.myService.getData1()
+  .pipe(takeUntil(this.destroy$))
+  .subscribe(data => {});
+
+ngOnDestroy() {
+  this.destroy$.next();
+  this.destroy$.complete();
+}
+```
+
+---
+
+## Routing
+
+### Route Definitions
+
+```ts
+{
+  path: "login",
+  loadComponent: () =>
+    import("./components/auth/login-page").then((m) => m.LoginPage),
+},
+{ path: "", component: HomeComponent },
+{ path: "users/new", component: NewUserComponent },
+{ path: "users/:id", component: UserDetailComponent },
+{ path: "users", component: UsersComponent },
+{ path: "**", component: NotFoundComponent }
+```
+
+### Redirects
+
+```ts
+{
+  path: "articles",
+  redirectTo: "/blog",
+},
+{
+  path: "blog",
+  component: BlogComponent,
+}
+```
+
+### Nested Routes
+
+```ts
+{
+  path: "product/:id",
+  component: ProductComponent,
+  children: [
+    { path: "info", component: ProductInfoComponent },
+    { path: "reviews", component: ProductReviewsComponent }
+  ]
+}
+```
+
+### Router Outlet
+
+```html
+<router-outlet />
+<router-outlet
+  (activate)="onActivate($event)"
+  (deactivate)="onDeactivate($event)"
+  (attach)="onAttach($event)"
+  (detach)="onDetach($event)"
+/>
+```
+
+### Navigation
+
+```ts
+private router = inject(Router);
+this.router.navigate(['/profile']);
+
+// With query parameters
+this.router.navigate(['/search'], {
+  queryParams: { category: 'books', sort: 'price' }
+});
+```
+
+### Reading Route State
+
+```ts
+const routes: Routes = [{ path: "product/:id", component: ProductComponent }];
+productId = signal("");
+
+private activatedRoute = inject(ActivatedRoute);
+
+constructor() {
+  this.activatedRoute.params.subscribe((params) => {
+    this.productId.set(params["id"]);
+  });
+}
+```
+
+### Active Route Detection with `RouterLinkActive`
+
+```html
+<a
+  class="button"
+  routerLink="/about"
+  routerLinkActive="active-button"
+  ariaCurrentWhenActive="page"
+>
+  About
+</a>
+
+<a routerLink="/user/bob" [routerLinkActive]="['class1', 'class2']">Bob</a>
+```
+
+---
+
+## Useful Tools
+
+| Tool                                                                                                 | Description                 |
+| ---------------------------------------------------------------------------------------------------- | --------------------------- |
+| [@gorillait/angular-tree-component](https://www.npmjs.com/package/@gorillait/angular-tree-component) | Lazy-loading tree component |
+| [ngx-toastr](https://www.npmjs.com/package/ngx-toastr)                                               | Toast notifications         |
+| [echarts](https://echarts.apache.org/)                                                               | Charting library            |
+
+```
+
+```

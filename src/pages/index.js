@@ -16,14 +16,18 @@ function HomepageHeader() {
           Developer Knowledge Hub
         </Heading>
 
-        <p className={styles.heroSubtitle}>Learn. Document. Build Faster.</p>
+        <p className={styles.heroSubtitle}>
+          Save, organize, and reuse developer knowledge instantly. Copy snippets
+          from others, document your own projects, and build faster with
+          ready-to-use code.
+        </p>
 
         <div className={styles.buttons}>
           <Link
             className="button button--secondary button--lg"
             to="/docs/knowledge/software-development/javascript"
           >
-            Explore Knowledge
+            Start Building Faster
           </Link>
         </div>
       </div>
